@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "../sources/Multiplication.v"
+`include "../sources/Floating_Adder_2.v"
 
 module Converter_tb #(parameter XLEN = 32);
 reg [XLEN-1:0] A,B;

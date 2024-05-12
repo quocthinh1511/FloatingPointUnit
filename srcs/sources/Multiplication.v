@@ -47,11 +47,10 @@ assign B_Mantissa = {1'b1,B[22:0]};
 assign B_Exponent = B[30:23];
 assign B_sign = B[31];
 
-// assign Temp_Exponent = A_Exponent+B_Exponent-127;
+
 bit8adder a1(A_Exponent,B_Exponent,temp_ex,/**/);
 bit8adder a2(temp_ex,8'b10000001,Temp_Exponent,/**/);
-// assign  = temp_ex -127;
-// bit8adder a2(Temp_Exponent,8'b10000001,Temp_Exponent,/**/);
+
 
 nhan_24bit nhan(A_Mantissa,B_Mantissa,Temp_Mantissa,A_Mantissa_pad);
 
@@ -59,9 +58,7 @@ nhan_24bit nhan(A_Mantissa,B_Mantissa,Temp_Mantissa,A_Mantissa_pad);
 always @(*)
 begin
 Mantissa = Temp_Mantissa[47] ? Temp_Mantissa[46:24] : Temp_Mantissa[45:23];
-
-Exponent = Temp_Mantissa[47] ? Temp_Exponent+1'b1 : Temp_Exponent;
-
+Exponent = Temp_Mantissa[47] ? Temp_E xponent+1'b1 : Temp_Exponent;
 Sign = A_sign^B_sign;
 result = {Sign,Exponent,Mantissa};
 end
