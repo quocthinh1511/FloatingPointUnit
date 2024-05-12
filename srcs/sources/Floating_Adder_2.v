@@ -38,11 +38,11 @@ integer i ;
 integer g ; 
 integer t ; 
 integer p; 
-
+integer z; 
 
 
 always @(*) begin
-    
+
   one = 8'b00000001;
   one_24bit= 24'b000000000000000000000001;
   comp =  (A[30:23] >= B[30:23])? 1'b1 : 1'b0;
@@ -69,8 +69,10 @@ carry_bit_diff[0]=1'b0;
         carry_bit_diff[g+1] = (A_Exponent[g] &  B_Exponent_comp[g] )|( B_Exponent_comp[g] & carry_bit_diff[g])|(carry_bit_diff[g] & A_Exponent[g]);
     end
 
- 
-  B_Mantissa = (B_Mantissa >> diff_Exponent);
+    for(z=0;z<diff_Exponent; z=z+1) begin   
+          B_Mantissa = {1'b0, B_Mantissa[23:1]};
+    end
+
 
   if(A[31] ^ B[31] ==1) begin
     B_Mantissa = ~B_Mantissa;
@@ -139,14 +141,14 @@ end
 else begin 
     if(carry)
     begin
-        sum = sum>>1;
+        sum = {1'b0, sum[23:1]};
         exp_adjust = exp_adjust+1'b1;
     end
 else
     begin
     while(!sum[23])
         begin
-           sum = sum<<1;
+           sum =  { sum[22:0],1'b0};
            exp_adjust =  exp_adjust-1'b1;
         end
     end
