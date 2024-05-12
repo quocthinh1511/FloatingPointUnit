@@ -16,6 +16,7 @@ reg [22:0] Mantissa;
 reg [7:0] Exponent;
 reg Sign;
 wire MSB;
+wire [7:0] temp_ex;
 wire [7:0] A_Exponent,B_Exponent,Temp_Exponent,diff_Exponent;
 wire A_sign,B_sign,Temp_sign;
 reg [32:0] Temp;
@@ -46,32 +47,24 @@ assign B_Mantissa = {1'b1,B[22:0]};
 assign B_Exponent = B[30:23];
 assign B_sign = B[31];
 
-assign Temp_Exponent = A_Exponent+B_Exponent-127;
-
-
-
+// assign Temp_Exponent = A_Exponent+B_Exponent-127;
+bit8adder a1(A_Exponent,B_Exponent,temp_ex,/**/);
+bit8adder a2(temp_ex,8'b10000001,Temp_Exponent,/**/);
+// assign  = temp_ex -127;
+// bit8adder a2(Temp_Exponent,8'b10000001,Temp_Exponent,/**/);
 
 nhan_24bit nhan(A_Mantissa,B_Mantissa,Temp_Mantissa,A_Mantissa_pad);
 
+
 always @(*)
 begin
-
-
-
-
-
 Mantissa = Temp_Mantissa[47] ? Temp_Mantissa[46:24] : Temp_Mantissa[45:23];
 
 Exponent = Temp_Mantissa[47] ? Temp_Exponent+1'b1 : Temp_Exponent;
 
 Sign = A_sign^B_sign;
 result = {Sign,Exponent,Mantissa};
-
 end
-
-
-
-
 
 
 
@@ -163,4 +156,22 @@ output s,c;
 wire a,b,c,s;
 assign s = a ^ b;
 assign c = a &b;
+endmodule
+
+module bit8adder (in1, in2, S, Cout);//bo cong 8bit
+  input [7:0] in1, in2;
+  output [7:0] S;
+  output Cout;
+  wire [7:1] temp;
+  wire Cout;
+  FA_1 A_0(in1[0], in2[0], 1'b0, S[0], temp[1]);
+  FA_1 A_1(in1[1],in2[1], temp[1], S[1], temp[2]);
+  FA_1 A_2(in1[2], in2[2], temp[2], S[2], temp[3]);
+  FA_1 A_3(in1[3], in2[3], temp[3], S[3], temp[4]);
+  FA_1 A_4(in1[4], in2[4], temp[4], S[4], temp[5]);
+  FA_1 A_5(in1[5], in2[5], temp[5], S[5], temp[6]);
+  FA_1 A_6(in1[6], in2[6], temp[6],S[6], temp[7]);
+  FA_1 A_7(in1[7], in2[7],temp[7], S[7], Cout);
+//   assign S[8] = Cout;
+ 
 endmodule
