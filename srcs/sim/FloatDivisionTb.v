@@ -41,7 +41,7 @@ value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(resul
 $display("Expected Value : %f Result : %f",6.4/(-0.5),value);
 #20
 value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(result[31]));
-$display("Expected Value : %f Result : %f",2.82/0.94,value);
+$display("Expected Value : %f Result : %f",2.82/(-0.94),value);
 $finish;
 end
 endmodule
