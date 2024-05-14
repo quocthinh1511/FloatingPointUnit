@@ -2,7 +2,7 @@
 `include "../sources/Substract.v"
 `include "../sources/Multiplication.v"
 `include "../sources/FloatingDivision.v"
-
+`include "../sources/FP_convert.v"
 
 
 module FPU(input [31:0]A,
@@ -12,7 +12,7 @@ module FPU(input [31:0]A,
 
 wire [31:0] result_add;
 wire [31:0] result_sub;
-wire [31:0] result_mull;
+wire [31:0] result_mul;
 wire [31:0] result_div;
 reg  [31:0] result;
 
@@ -20,7 +20,7 @@ reg  [31:0] result;
  Substract sub (.A(A), .B(B), .result(result_sub));
  Multiplication mul(.A(A), .B(B), .result(result_mul));
  FloatingDivision div (.A(A), .B(B), .result(result_div));
-FPU_convert convert(result, result_float );
+
 
 always @(*) begin
     case(op) 
@@ -43,4 +43,6 @@ always @(*) begin
 
 
 end
+
+FPU_convert convert(.A(result), .result(result_float) );
 endmodule 

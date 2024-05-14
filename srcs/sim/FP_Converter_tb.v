@@ -1,13 +1,12 @@
 `timescale 1ns / 1ps
-`include "../sources/Converter_FloatingPoint/FP_to_fixed.v"
+`include "../sources/FP_convert.v"
 
 module Converter_tb #(parameter XLEN = 32);
 reg [XLEN-1:0] A;
 
 wire [31:0] result;
-real  value;
 
-FP_sang_TP F_Add (.a(A),.result(result));
+FPU_convert F_Add (.A(A),.result(result));
 
 initial  
 begin
@@ -25,15 +24,15 @@ end
 
 initial
 begin
-// #20
-// $display("Result : %f",result);
-// #20
-// $display("Result : %f",result);
-// #20
-// $display("Result : %f",result);
-// #20
-// $display("Result : %f",result);
-// #20
-// $finish;
+#20
+$display("Result : %f",result);
+#20
+$display("Result : %f",result);
+#20
+$display("Result : %f",result);
+#20
+$display("Result : %f",result);
+#20
+$finish;
 end
 endmodule

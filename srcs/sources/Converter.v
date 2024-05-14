@@ -134,7 +134,7 @@ else
             sign_bit =1;
         end 
     end  
-  $display("trai dau");  
+
  Sign =sign_bit;
  Mantissa = sum;
  Exponent = exp_adjust-g;
@@ -160,7 +160,7 @@ else
   else begin
     sign_bit =0;
   end
-  $display("cung dau");
+
  Sign =sign_bit;
  Mantissa = sum;
  Exponent = exp_adjust;
