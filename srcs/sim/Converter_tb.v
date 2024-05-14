@@ -1,14 +1,12 @@
 `timescale 1ns / 1ps
-`include "../sources/Converter.v"
+`include "../sources/fpu.v"
 
 module Converter_tb #(parameter XLEN = 32);
 reg [XLEN-1:0] A,B;
-reg clk;
-reg overflow, underflow, exception;
-wire [XLEN-1:0] result;
-real  value;
+wire [31:0] result;
+wire [31:0] result_float;
 
-Converter F_Add (.clk(clk),.A(A),.B(B),.result(result));
+FPU F_Add (.A(A),.B(B),.result(result), .result_float(result_float));
 
 initial  
 begin
@@ -32,26 +30,20 @@ end
 initial
 begin
 #20
-value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(result[31]));
 $display("Result : %b",result);
-$display("Expected Value : %f Result : %f",3.2+4.2,value);
+$display("Expected Value : %f ",result_float);
 #20
 $display("Result : %b",result);
-value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(result[31]));
-$display("Expected Value : %f Result : %f",0.66+0.51,value);
+$display("Expected Value : %f ",0.66+0.51,result);
 #20
 $display("Result : %b",result);
-value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(result[31]));
-$display("Expected Value : %f Result : %f",-0.5+6.4,value);
+$display("Expected Value : %f Result : %f",result_float);
 
 #20
 
-value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(result[31]));
-$display("Expected Value : %f Result : %f",-0.46799183-0.28049564
-,value);
+$display("Expected Value : %f",result);
 #20
-value =(2**(result[30:23]-127))*($itor({1'b1,result[22:0]})/2**23)*((-1)**(result[31]));
-$display("Expected Value : %f Result : %f",2.82-0.94,value);
+$display("Expected Value : %f ",result_float);
 $finish;
 end
 endmodule

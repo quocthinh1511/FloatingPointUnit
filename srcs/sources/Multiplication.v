@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-module Converter #(parameter XLEN=32)
+module Multiplication #(parameter XLEN=32)
                         (input [XLEN-1:0]A,
                          input [XLEN-1:0]B,
                          input clk,
@@ -58,7 +58,7 @@ nhan_24bit nhan(A_Mantissa,B_Mantissa,Temp_Mantissa,A_Mantissa_pad);
 always @(*)
 begin
 Mantissa = Temp_Mantissa[47] ? Temp_Mantissa[46:24] : Temp_Mantissa[45:23];
-Exponent = Temp_Mantissa[47] ? Temp_E xponent+1'b1 : Temp_Exponent;
+Exponent = Temp_Mantissa[47] ? Temp_Exponent+1'b1 : Temp_Exponent;
 Sign = A_sign^B_sign;
 result = {Sign,Exponent,Mantissa};
 end

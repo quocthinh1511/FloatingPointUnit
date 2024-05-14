@@ -26,29 +26,95 @@ reg [XLEN-1:0] B_scaled;
 reg en1,en2,en3,en4,en5;
 reg dummy;
 /*----Initial value----*/
-FloatingMultiplication M1(.A({{1'b0,8'd126,B[22:0]}}),.B(32'h3ff0f0f1),.clk(clk),.result(temp1)); //verified
+M_Converter M1(.A({{1'b0,8'd126,B[22:0]}}),.B(32'h3ff0f0f1),.clk(clk),.result(temp1)); //verified
 assign debug = {1'b1,temp1[30:0]};
-FloatingAddition A1(.A(32'h4034b4b5),.B({1'b1,temp1[30:0]}),.result(x0));
+A_Converter A1(.A(32'h4034b4b5),.B({1'b1,temp1[30:0]}),.result(x0));
 
 /*----First Iteration----*/
-FloatingMultiplication M2(.A({{1'b0,8'd126,B[22:0]}}),.B(x0),.clk(clk),.result(temp2));
-FloatingAddition A2(.A(32'h40000000),.B({!temp2[31],temp2[30:0]}),.result(temp3));
-FloatingMultiplication M3(.A(x0),.B(temp3),.clk(clk),.result(x1));
+M_Converter M2(.A({{1'b0,8'd126,B[22:0]}}),.B(x0),.clk(clk),.result(temp2));
+A_Converter A2(.A(32'h40000000),.B({!temp2[31],temp2[30:0]}),.result(temp3));
+M_Converter M3(.A(x0),.B(temp3),.clk(clk),.result(x1));
 
 /*----Second Iteration----*/
-FloatingMultiplication M4(.A({1'b0,8'd126,B[22:0]}),.B(x1),.clk(clk),.result(temp4));
-FloatingAddition A3(.A(32'h40000000),.B({!temp4[31],temp4[30:0]}),.result(temp5));
-FloatingMultiplication M5(.A(x1),.B(temp5),.clk(clk),.result(x2));
+M_Converter M4(.A({1'b0,8'd126,B[22:0]}),.B(x1),.clk(clk),.result(temp4));
+A_Converter A3(.A(32'h40000000),.B({!temp4[31],temp4[30:0]}),.result(temp5));
+M_Converter M5(.A(x1),.B(temp5),.clk(clk),.result(x2));
 
 /*----Third Iteration----*/
-FloatingMultiplication M6(.A({1'b0,8'd126,B[22:0]}),.B(x2),.clk(clk),.result(temp6));
-FloatingAddition A4(.A(32'h40000000),.B({!temp6[31],temp6[30:0]}),.result(temp7));
-FloatingMultiplication M7(.A(x2),.B(temp7),.clk(clk),.result(x3));
+M_Converter M6(.A({1'b0,8'd126,B[22:0]}),.B(x2),.clk(clk),.result(temp6));
+A_Converter A4(.A(32'h40000000),.B({!temp6[31],temp6[30:0]}),.result(temp7));
+M_Converter M7(.A(x2),.B(temp7),.clk(clk),.result(x3));
+
+
+
 
 /*----Reciprocal : 1/B----*/
-assign Exponent = x3[30:23]+8'd126-B[30:23];
+// assign Exponent = x3[30:23]+8'd126-B[30:23];
+Addition_CV A5(.op1(x3[30:23]),.op2(8'd126),.result(Temp_Exponent));
+Subtraction_CV S1(.op1(Temp_Exponent), .op2(B[30:23]), .result(Exponent));
 assign reciprocal = {B[31],Exponent,x3[22:0]};
 
 /*----Multiplication A*1/B----*/
-FloatingMultiplication M8(.A(A),.B(reciprocal),.clk(clk),.result(result));
+M_Converter M8(.A(A),.B(reciprocal),.clk(clk),.result(result));
+endmodule
+
+//===================================================================
+module Subtraction_CV
+(
+	output	[7:0] 	result, 
+	input 	[7:0]	op1,
+	input 	[7:0]	op2
+);	
+	logic 	[7:0]	man_x,
+					man_y,
+					pre_result,
+					cal_c_out;
+	
+	logic	[8:0]	cal_c_in;				
+	
+	assign	cal_c_in[0] = 1'b1;
+	assign 	man_x = op1;
+	assign 	man_y = op2;
+	assign 	result = pre_result;
+	
+	genvar a;
+	generate
+		for(a = 0; a < 8; a = a + 1)
+		begin:	full_adder
+			assign pre_result[a] = man_x[a] ^ (1'b1 ^ man_y[a]) ^ cal_c_in[a];
+			assign cal_c_out[a] = man_x[a] && (1'b1 ^ man_y[a]) || cal_c_in[a] && (man_x[a] ^ (1'b1 ^ man_y[a]));
+			assign cal_c_in[a+1] = cal_c_out[a];
+		end
+	endgenerate		
+
+endmodule
+
+module Addition_CV
+(
+	output	[7:0] 	result, 
+	input 	[7:0]	op1,
+	input 	[7:0]	op2
+);	
+	logic 	[7:0]	man_x,
+					man_y,
+					pre_result,
+					cal_c_out;
+	
+	logic	[8:0]	cal_c_in;				
+	
+	assign	cal_c_in[0] = 1'b0; // For addition, initial carry-in is set to 0
+	assign 	man_x = op1;
+	assign 	man_y = op2;
+	assign 	result = pre_result;
+	
+	genvar a;
+	generate
+		for(a = 0; a < 8; a = a + 1)
+		begin:	full_adder
+			assign pre_result[a] = man_x[a] ^ man_y[a] ^ cal_c_in[a];
+			assign cal_c_out[a] = (man_x[a] & man_y[a]) | (cal_c_in[a] & (man_x[a] ^ man_y[a]));
+			assign cal_c_in[a+1] = cal_c_out[a];
+		end
+	endgenerate		
+
 endmodule
