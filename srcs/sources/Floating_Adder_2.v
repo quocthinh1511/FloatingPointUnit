@@ -39,26 +39,30 @@ integer g ;
 integer t ; 
 integer p; 
 integer z; 
-always @(*)
-begin
+
+
+always @(*) begin
+
   one = 8'b00000001;
   one_24bit= 24'b000000000000000000000001;
-
-comp =  (A[30:23] >= B[30:23])? 1'b1 : 1'b0;
-A_Mantissa = comp ? {1'b1,A[22:0]} : {1'b1,B[22:0]};
-A_Exponent = comp ? A[30:23] : B[30:23];
-A_sign = comp ? A[31] : B[31];
+  comp =  (A[30:23] >= B[30:23])? 1'b1 : 1'b0;
+  A_Mantissa = comp ? {1'b1,A[22:0]} : {1'b1,B[22:0]};
+  A_Exponent = comp ? A[30:23] : B[30:23];
+  A_sign = comp ? A[31] : B[31];
   
-B_Mantissa = comp ? {1'b1,B[22:0]} : {1'b1,A[22:0]};
-B_Exponent = comp ? B[30:23] : A[30:23];
-B_sign = comp ? B[31] : A[31];
+  B_Mantissa = comp ? {1'b1,B[22:0]} : {1'b1,A[22:0]};
+  B_Exponent = comp ? B[30:23] : A[30:23];
+  B_sign = comp ? B[31] : A[31];
 
+
+exp_adjust = A_Exponent;
 B_Exponent = ~B_Exponent;
 carry_bit_comp_ex[0]=1'b0;
     for(t=0;t<8; t=t+1) begin   
         B_Exponent_comp[t] = B_Exponent[t] ^ one[t] ^ carry_bit_comp_ex[t];
         carry_bit_comp_ex[t+1] = (B_Exponent[t] &  one[t] )|( one[t] & carry_bit_comp_ex[t])|(carry_bit_comp_ex[t] & B_Exponent[t]);
     end
+
 carry_bit_diff[0]=1'b0;
     for(g=0;g<8; g=g+1) begin   
         diff_Exponent[g] = A_Exponent[g] ^ B_Exponent_comp[g] ^ carry_bit_diff[g];
@@ -70,11 +74,8 @@ carry_bit_diff[0]=1'b0;
     end
 
 
-
-
-if(A[31] ^ B[31] ==1) begin
-
-  B_Mantissa = ~B_Mantissa;
+  if(A[31] ^ B[31] ==1) begin
+    B_Mantissa = ~B_Mantissa;
     carry_bit_comp_bman[0]=1'b0;
     for(p=0;p<24; p=p+1) begin   
         B_comp[p] = B_Mantissa[p] ^ one_24bit[p] ^ carry_bit_comp_bman[p];
@@ -85,26 +86,23 @@ else begin
     B_comp = B_Mantissa;
 end
 
-exp_adjust = A_Exponent;
-generate_bit = A_Mantissa & B_comp ;
-propegate_bit = A_Mantissa ^ B_comp ; 
 
-carry_bit[0] = 0;
+    carry_bit[0] = 1'b0;
+    for(i=0;i<24; i=i+1) begin   
+        sum[i] = A_Mantissa[i] ^ B_comp[i] ^ carry_bit[i];
+        carry_bit[i+1] = (A_Mantissa[i] &  B_comp[i] )|( B_comp[i] & carry_bit[i])|(carry_bit[i] & A_Mantissa[i]);
+    end
 
-for(i=1; i<=24;i++) begin 
-    carry_bit[i] = generate_bit[i-1] | propegate_bit[i-1] & carry_bit[i-1];
-end
 
-sum[0] =propegate_bit[0]^carry_bit[0];
 
-for(i=1; i<=23;i++) begin 
-    sum[i] = propegate_bit[i] ^ carry_bit[i];
-end
-// sum = propegate_bit^carry_bit;
+    $display("A_man : %d", A_Mantissa); 
+    $display("B_man : %d", B_Mantissa); 
+    $display("sum : %d", sum); 
 
 carry = carry_bit[24];
-g=0;
 
+
+     g=0;
 if(A[31] ^ B[31] ==1) begin 
     if(!carry)
     begin
@@ -169,5 +167,6 @@ else
 end
 end
 endmodule
+
 
 
