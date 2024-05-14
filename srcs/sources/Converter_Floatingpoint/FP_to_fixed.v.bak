@@ -1,0 +1,25 @@
+
+// `include "../sources/Converter_Floatingpoint/tim_phan_nguyen.v"
+// `include "../sources/Converter_Floatingpoint//tinh_mu.v"
+// `include "../sources/Converter_Floatingpoint/tinh_phan_tp.v"
+// `include "../sources/Converter_Floatingpoint/botru.v"
+// `include "../sources/Converter_Floatingpoint/cong_8bit.v"
+// `include "../sources/Converter_Floatingpoint/cong_24bit.v"
+// `include "../sources/Converter_Floatingpoint/tru_8bit.v"
+module FP_sang_TP(a,result);
+input [31:0]a;   // so fp
+output [31:0] result;
+wire [22:0] temp; 
+
+assign temp = 32'd1;
+// assign dau=(a[31]==1'b0)?(8'b0010_1011):(8'b0010_1101);  // xác d?nh dau 
+// botru  z(.in1(a[30:23]),.S(S), .Cout(Cout),.dau(dau1));  /// tinh phan 2^S và dau 
+assign a[22:0] =a[22:0]<<2;
+
+assign result =a*($itor({1'b1,a[22:0]})/2**23)*((-1)**(a[31]));
+// assign result = temp;
+always@(*) begin
+    $display(" real result is %f",temp );
+end
+endmodule 
+
